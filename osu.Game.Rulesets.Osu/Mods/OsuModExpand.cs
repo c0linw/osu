@@ -33,33 +33,27 @@ namespace osu.Game.Rulesets.Osu.Mods
 
         private void drawableOnApplyCustomUpdateState(DrawableHitObject drawable, ArmedState state)
         {
-            if (!(drawable is DrawableOsuHitObject d))
-                return;
+            var hitObject = (OsuHitObject)drawable.HitObject;
+            Vector2 origin = drawable.Position;
 
-            var h = d.HitObject;
-
-            switch (drawable)
+            switch(drawable)
             {
                 case DrawableHitCircle circle:
-                    using (circle.BeginAbsoluteSequence(h.StartTime - h.TimePreempt, true))
-                        circle.ApproachCircle.Alpha = 1;
-                        circle.ApproachCircle.Scale = new Vector2(1);
-
-                    // expand hitcircle scale from 0 to 1
-                    using (drawable.BeginAbsoluteSequence(h.StartTime - h.TimePreempt, true))
-                        circle.Scale = new Vector2(0);
-                        circle.FadeIn(Math.Min(h.TimeFadeIn * 2, h.TimePreempt));
-                        circle.ScaleTo(1.0f, h.TimePreempt);
-
-                    break;
-                    /*  I don't even know how I want sliders to look
-                     *  
-                case DrawableSlider slider:
-                    using (slider.BeginAbsoluteSequence(fadeOutStartTime, true))
-                        slider.Body.FadeOut(longFadeDuration, Easing.Out);
-
-                    break;
-                    */
+                    using (circle.BeginAbsoluteSequence(hitObject.StartTime - hitObject.TimePreempt, true))
+                    {
+                        circle.Alpha = 0;
+                        circle.Scale = new Vector2(0.1f);
+                        circle.ScaleTo(hitObject.Scale, hitObject.TimePreempt * 0.75, Easing.In);
+                        circle.FadeIn(Math.Min(hitObject.TimeFadeIn * 2, hitObject.TimePreempt));
+                    }
+                    using (circle.ApproachCircle.BeginAbsoluteSequence(hitObject.StartTime - hitObject.TimePreempt, true))
+                    {
+                        circle.ApproachCircle.Alpha = 0;
+                        circle.ApproachCircle.Scale = new Vector2(20);
+                        circle.ApproachCircle.FadeIn(Math.Min(hitObject.TimeFadeIn * 2, hitObject.TimePreempt));
+                        circle.ApproachCircle.ScaleTo(1.1f, hitObject.TimePreempt); ;
+                    }
+                        break;
             }
         }
     }
