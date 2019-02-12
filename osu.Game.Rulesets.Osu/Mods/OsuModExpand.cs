@@ -10,6 +10,7 @@ using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
+using osu.Game.Rulesets.Osu.Objects.Drawables.Pieces;
 using osuTK;
 
 namespace osu.Game.Rulesets.Osu.Mods
@@ -22,7 +23,7 @@ namespace osu.Game.Rulesets.Osu.Mods
         public override ModType Type => ModType.Fun;
         public override string Description => "In Mother Russia, circle approach you.";
         public override double ScoreMultiplier => 1;
-        public override Type[] IncompatibleMods => new[] { typeof(OsuModHidden), typeof(OsuModWiggle) };
+        public override Type[] IncompatibleMods => new[] { typeof(OsuModHidden), typeof(OsuModWiggle), typeof(OsuModTransform) };
 
         public void ApplyToDrawableHitObjects(IEnumerable<DrawableHitObject> drawables)
         {
@@ -40,20 +41,25 @@ namespace osu.Game.Rulesets.Osu.Mods
             switch (drawable)
             {
                 case DrawableHitCircle circle:
-                    // keep approach circle at min size
                     using (circle.BeginAbsoluteSequence(h.StartTime - h.TimePreempt, true))
-                        circle.ApproachCircle.Hide();
+                        circle.ApproachCircle.Alpha = 1;
+                        circle.ApproachCircle.Scale = new Vector2(1);
 
                     // expand hitcircle scale from 0 to 1
-                    using (drawable.BeginAbsoluteSequence(fadeOutStartTime, true))
-                        circle.FadeOut(fadeOutDuration);
+                    using (drawable.BeginAbsoluteSequence(h.StartTime - h.TimePreempt, true))
+                        circle.Scale = new Vector2(0);
+                        circle.FadeIn(Math.Min(h.TimeFadeIn * 2, h.TimePreempt));
+                        circle.ScaleTo(1.0f, h.TimePreempt);
 
                     break;
+                    /*  I don't even know how I want sliders to look
+                     *  
                 case DrawableSlider slider:
                     using (slider.BeginAbsoluteSequence(fadeOutStartTime, true))
                         slider.Body.FadeOut(longFadeDuration, Easing.Out);
 
                     break;
+                    */
             }
         }
     }
